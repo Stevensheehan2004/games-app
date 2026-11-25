@@ -1,10 +1,16 @@
+import io.github.oshai.kotlinlogging.KotlinLogging
 import model.Game
 import service.GameService
-
+import utils.readNextInt
+import utils.readNextDouble
+import utils.readNextInt
+import utils.readNextLine
 
 val gameService = GameService()
+private val logger = KotlinLogging.logger {}
 
 fun main() {
+    logger.info { "Games App Started" }
     runMenu()
 }
 
@@ -21,8 +27,8 @@ fun mainMenu(): Int {
          > ----------------------------------
          > |   0) Exit                      |
          > ----------------------------------
-         > ==>> """.trimMargin(">"))
-    return readlnOrNull()?.toIntOrNull() ?: -1
+         > """.trimMargin(">"))
+    return readNextInt("==>> ")
 }
 
 fun runMenu() {
@@ -32,32 +38,25 @@ fun runMenu() {
         when (input) {
             1 -> addGame()
             2 -> listGames()
-            3 -> println("Update game will be coded here")
-            4 -> println("Delete game will be coded here")
-            0 -> println("Exiting App")
+            3 -> updateGame()
+            4 -> deleteGame()
+            0 -> {
+                println("Exiting App")
+                logger.info { "Games App Exiting" }
+            }
+
             else -> println("Invalid Option")
         }
     } while (input != 0)
 }
 
 fun addGame() {
-    print("Name: ")
-    val name = readlnOrNull() ?: ""
-
-    print("Genre: ")
-    val genre = readlnOrNull() ?: ""
-
-    print("Price: ")
-    val price = readlnOrNull()?.toDoubleOrNull() ?: 0.0
-
-    print("Production Cost: ")
-    val productionCost = readlnOrNull()?.toDoubleOrNull() ?: 0.0
-
-    print("Copies Sold: ")
-    val copiesSold = readlnOrNull()?.toIntOrNull() ?: 0
-
-    print("Company ID: ")
-    val companyId = readlnOrNull()?.toIntOrNull() ?: 0
+    val name = readNextLine("Name: ")
+    val genre = readNextLine("Genre: ")
+    val price = readNextDouble("Price: ")
+    val productionCost = readNextDouble("Production Cost: ")
+    val copiesSold = readNextInt("Copies Sold: ")
+    val companyId = readNextInt("Company ID: ")
 
     gameService.addGame(
         Game(0, name, genre, price, productionCost, copiesSold, companyId)
@@ -67,5 +66,33 @@ fun addGame() {
 }
 
 fun listGames() {
-    println(gameService.getGames())
+    gameService.getGames().forEach { println(it) }
+}
+
+fun updateGame() {
+    val id = readNextInt("Enter ID to update: ")
+    val name = readNextLine("Name: ")
+    val genre = readNextLine("Genre: ")
+    val price = readNextDouble("Price: ")
+    val productionCost = readNextDouble("Production Cost: ")
+    val copiesSold = readNextInt("Copies Sold: ")
+    val companyId = readNextInt("Company ID: ")
+
+    val updated = Game(id, name, genre, price, productionCost, copiesSold, companyId)
+
+    if (gameService.updateGame(id, updated)) {
+        println("Updated")
+    } else {
+        println("Not found")
+    }
+}
+
+fun deleteGame() {
+    val id = readNextInt("Enter ID to delete: ")
+
+    if (gameService.deleteGame(id)) {
+        println("Deleted")
+    } else {
+        println("Not found")
+    }
 }
